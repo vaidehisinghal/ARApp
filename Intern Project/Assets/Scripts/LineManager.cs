@@ -9,19 +9,44 @@ public class LineManager : MonoBehaviour
     public LineRenderer lineRenderer;
     public ARPlacementInteractable placementInteractable;
     public TextMeshPro mText;
+    private int pointCnt=0;
+    LineRenderer line;
+    public bool continuous;
+    public TextMeshProUGUI buttonText;
     void Start()
     {
         placementInteractable.objectPlaced.AddListener(DrawLine);
     }
+
+    public void ToggleBetween()
+    {
+        continuous=!continuous;
+        if(!continuous){
+            buttonText.text="Continuous";
+        }
+        else{
+            buttonText.text="Discrete";
+        }
+    }
+
     void DrawLine(ARObjectPlacementEventArgs args)
     {
-        //increase point count
-        lineRenderer.positionCount++;
+        pointCnt++;
+        if(pointCnt<2){
+            line= Instantiate(lineRenderer);
+            line.positionCount=1;
+        }
+        else{
+            line.positionCount=pointCnt;
+            if(!continuous){
+                pointCnt=0;
+            }
+        }
         //add point locn in point renderer
-        lineRenderer.SetPosition(index:lineRenderer.positionCount-1,args.placementObject.transform.position);
-        if(lineRenderer.positionCount>1){
-            Vector3 pointA= lineRenderer.GetPosition(index:lineRenderer.positionCount-1);
-            Vector3 pointB= lineRenderer.GetPosition(index:lineRenderer.positionCount-2);
+        line.SetPosition(index:line.positionCount-1,args.placementObject.transform.position);
+        if(line.positionCount>1){
+            Vector3 pointA= line.GetPosition(index:line.positionCount-1);
+            Vector3 pointB= line.GetPosition(index:line.positionCount-2);
             float dist = Vector3.Distance(pointA,pointB);
             TextMeshPro distText = Instantiate(mText);
             distText.text=""+dist;
